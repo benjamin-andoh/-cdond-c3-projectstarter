@@ -63,7 +63,7 @@ jobs:
           command: |
             cd frontend
             npm install
-            npm run start
+            npm run build
 
       - save_cache:
           paths: [backend/node_modules]
