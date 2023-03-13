@@ -99,7 +99,7 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Run front-end scan
+          name: Scan front-end dependencies
           command: |
             cd frontend && \
             npm install && \
@@ -113,7 +113,7 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Run Back-end scan
+          name: Scan Back-end dependencies
           command: |
             cd backend && \
             npm install && \
