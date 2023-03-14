@@ -7,11 +7,6 @@ commands:
       workflow_id:
         type: string 
     steps:
-      # - run:
-      #     name: Destroy frontend
-      #     when: on_fail
-      #     command: |
-
       - run:
           name: Destroy backend
           when: on_fail
@@ -98,33 +93,33 @@ jobs:
             npm install && \
             npm run test
             
-  scan-frontend:
-    docker:
-      - image: circleci/node:13.8.0
-    steps:
-      - checkout
-      - run:
-          name: Scan front-end dependencies
-          command: |
-            cd frontend && \
-            npm install && \
-            npm audit fix --audit-level=critical --force && \
-            npm audit --audit-level=critical
-            npm audit fix --force
+  # scan-frontend:
+  #   docker:
+  #     - image: circleci/node:13.8.0
+  #   steps:
+  #     - checkout
+  #     - run:
+  #         name: Scan front-end dependencies
+  #         command: |
+  #           cd frontend && \
+  #           npm install && \
+  #           npm audit fix --audit-level=critical --force && \
+  #           npm audit --audit-level=critical
+  #           npm audit fix --force
 
-  scan-backend:
-    docker:
-      - image: circleci/node:13.8.0
-    steps:
-      - checkout
-      - run:
-          name: Scan Back-end dependencies
-          command: |
-            cd backend && \
-            npm install && \
-            npm audit fix --audit-level=critical --force && \
-            npm audit --audit-level=critical
-            npm audit fix --force
+  # scan-backend:
+  #   docker:
+  #     - image: circleci/node:13.8.0
+  #   steps:
+  #     - checkout
+  #     - run:
+  #         name: Scan Back-end dependencies
+  #         command: |
+  #           cd backend && \
+  #           npm install && \
+  #           npm audit fix --audit-level=critical --force && \
+  #           npm audit --audit-level=critical
+  #           npm audit fix --force
       
   deploy-infrastructure:
     docker:
@@ -163,9 +158,9 @@ jobs:
           paths:
             - .circleci/ansible/inventory.txt
 
-      # Here's where you will add some code to rollback on failure 
       - destroy-environment:
-          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}      
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}   
+          # Here's where you will add some code to rollback on failure    
 
 #   configure-infrastructure:
 #     docker:
