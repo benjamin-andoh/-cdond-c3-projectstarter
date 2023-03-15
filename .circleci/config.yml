@@ -142,7 +142,7 @@ jobs:
               --template-file .circleci/files/backend.yml \
               --tags project=udapeople-${CIRCLE_WORKFLOW_ID:0:7} \
               --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
-              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}" 
+              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"  
               
       - run:
           name: Ensure front-end infrastructure exist
@@ -157,9 +157,10 @@ jobs:
           name: Add back-end ip to ansible inventory
           command: |
             cd .circleci/ansible
-            aws ec2 describe-instance \ 
-                --query 'Reservations[*].Instances[*].PublicIpAddress' \
-                --output text >> inventory.txt
+            aws ec2 describe-instances \
+                  --query 'Reservations[*].Instances[*].PublicIpAddress' \
+                  --filters "Name=tag:project,Values=udapeople-${CIRCLE_WORKFLOW_ID:0:7}" \
+                  --output text >> inventory.txt
 
       - persist_to_workspace:
           root: ~/
@@ -170,29 +171,29 @@ jobs:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}   
           # Here's where you will add some code to rollback on failure    
 
-  # configure-infrastructure:
-  #   docker:
-  #     - image: circleci/python:3.9.13
-  #   steps:
-  #     # checkout
-  #     - checkout 
-  #     # Add ssh keys with fingerprint
-  #     - add_ssh_keys:
-  #         fingerprints: [56:0e:43:58:88:81:d7:a3:19:12:c9:bb:ec:3e:20:ba]
-  #     # attach workspace
+  configure-infrastructure:
+    docker:
+      - image: circleci/python:3.9.13
+    steps:
+      # checkout
+      - checkout 
+      # Add ssh keys with fingerprint
+      - add_ssh_keys:
+          fingerprints: [56:0e:43:58:88:81:d7:a3:19:12:c9:bb:ec:3e:20:ba]
+      # attach workspace
 
-  #     - run:
-  #         name: Install dependencies
-  #         command: |
-  #           sudo apt-get update
-  #           sudo apt -y install python3 tar gzip
+      - run:
+          name: Install dependencies
+          command: |
+            sudo apt-get update
+            sudo apt -y install python3 tar gzip
             
-  #     - run:
-  #         name: Configure server
-  #         command: |
-  #           # Your code here
-  #           exit 1
-  #     # Here's where you will add some code to rollback on failure      
+      - run:
+          name: Configure server
+          command: |
+            # Your code here
+            exit 1
+      # Here's where you will add some code to rollback on failure      
 
 #   run-migrations:
 #     docker:
