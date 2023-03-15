@@ -201,12 +201,29 @@ jobs:
       - image: circleci/node:13.8.0
     steps:
       - checkout
+
+      - restore_cache:
+          keys: [backend-build]
+
+      - run:
+          name: Install aws cli
+          command: |
+            sudo curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+            sudo unzip awscliv2.zip
+            sudo ./aws/install
+
       - run:
           name: Run migrations
           command: |
             cd backend
             npm install 
             npm run migrations > migrations_dump.txt
+
+      # - run:
+      #     name: View logs
+      #     when: on_fail
+      #     command: |
+      #         cd /home/circleci/.npm/_logs/
       - run:
           name: Send migration results to memstash
           command: |
@@ -220,27 +237,36 @@ jobs:
       - destroy-environment:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
 
-  deploy-frontend:
-    docker:
-      - image: circleci/node:13.8.0
-    steps:
-      - checkout
-      - run:
-          name: Install dependencies
-          command: |
-            # your code here
-      - run:
-          name: Get backend url
-          command: |
-            # your code here
-            export API_URL="http://${BACKEND_IP}:3030"
-            echo "${API_URL}"
-      - run:
-          name: Deploy frontend objects
-          command: |
-            # your code here
-      - destroy-environment:
-          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}     
+  # deploy-frontend:
+  #   docker:
+  #     - image: circleci/node:13.8.0
+  #   steps:
+  #     - checkout
+  #     - attach_workspace:
+  #         at: .
+  #     - run:
+  #         name: Install tar gzip
+  #         command: |
+  #           sudo  apt -y install python3 tar gzip
+      
+  #     - run:
+  #         name: Install aws-cli ansible
+  #         command: |
+  #           sudo apt-get -y update
+  #           sudo apt-get -y install awscli ansible
+
+  #     - run:
+  #         name: Get backend url
+  #         command: |
+  #           # your code here
+  #           export API_URL="http://${BACKEND_IP}:3030"
+  #           echo "${API_URL}"
+  #     - run:
+  #         name: Deploy frontend objects
+  #         command: |
+  #           # your code here
+  #     - destroy-environment:
+  #         workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}     
                     
 #   deploy-backend:
 #     docker:
