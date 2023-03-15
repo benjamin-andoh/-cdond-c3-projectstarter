@@ -171,29 +171,29 @@ jobs:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}   
           # Here's where you will add some code to rollback on failure    
 
-  # configure-infrastructure:
-  #   docker:
-  #     - image: python:3.7-alpine3.11
-  #   steps:
-  #     - checkout 
-  #     - add_ssh_keys:
-  #         fingerprints: [56:0e:43:58:88:81:d7:a3:19:12:c9:bb:ec:3e:20:ba]
+  configure-infrastructure:
+    docker:
+      - image: python:3.7-alpine3.11
+    steps:
+      - checkout 
+      - add_ssh_keys:
+          fingerprints: [56:0e:43:58:88:81:d7:a3:19:12:c9:bb:ec:3e:20:ba]
       
-  #     - attach_workspace:
-  #         at: .
+      - attach_workspace:
+          at: .
 
-  #     - run:
-  #         name: Install dependencies
-  #         command: |
-  #           apk add --update ansible
+      - run:
+          name: Install dependencies
+          command: |
+            apk add --update ansible
 
-  #     - run:
-  #         name: Configure server
-  #         command: |
-  #           cd .circleci/ansible
-  #           ansible-playbook -i inventory.txt configure-server.yml -vvvv
-  #     - destroy-environment:
-  #         workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
+      - run:
+          name: Configure server
+          command: |
+            cd .circleci/ansible
+            ansible-playbook -i inventory.txt configure-server.yml -vvvv
+      - destroy-environment:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
       # Here's where you will add some code to rollback on failure      
 
 #   run-migrations:
