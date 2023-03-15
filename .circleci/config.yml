@@ -194,7 +194,7 @@ jobs:
             ansible-playbook -i inventory.txt configure-server.yml -vvvv
       - destroy-environment:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
-      # Here's where you will add some code to rollback on failure      
+           
 
   run-migrations:
     docker:
@@ -217,7 +217,8 @@ jobs:
           command: |
             cd backend
             npm install 
-            npm run migrations > migrations_dump.txt
+            npm run migrations > /migrations_dump.txt
+      
 
       # - run:
       #     name: View logs
@@ -375,3 +376,9 @@ workflows:
       #     requires: [smoke-test]
       # - cleanup:
       #     requires: [cloudfront-update]
+
+
+
+
+      5AA2wReLk1cd8nDmRnUvXi
+      L4RuHvYkPR4g9FqPaJQbtC
