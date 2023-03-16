@@ -284,7 +284,7 @@ jobs:
 
       - revert-migrations:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
-          
+
                     
   deploy-backend:
     docker:
@@ -422,8 +422,8 @@ workflows:
           requires: [configure-infrastructure]
       - deploy-frontend:
           requires: [run-migrations]
-      # - deploy-backend:
-      #     requires: [run-migrations]
+      - deploy-backend:
+          requires: [run-migrations]
       # - smoke-test:
       #     requires: [deploy-backend, deploy-frontend]
       # - cloudfront-update:
