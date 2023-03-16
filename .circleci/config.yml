@@ -80,6 +80,8 @@ jobs:
       - image: circleci/node:13.8.0
     steps:
       - checkout
+      - restore_cache:
+          keys: [frontend-build]
       - run:
           name: Run front-end test
           command: |
@@ -92,6 +94,8 @@ jobs:
       - image: circleci/node:13.8.0
     steps:
       - checkout
+      - restore_cache:
+          keys: [backend-build]      
       - run:
           name: Run Back-end test
           command: |
@@ -104,6 +108,8 @@ jobs:
       - image: circleci/node:13.8.0
     steps:
       - checkout
+      - restore_cache:
+          keys: [frontend-build]      
       - run:
           name: Scan front-end dependencies
           command: |
@@ -117,6 +123,8 @@ jobs:
       - image: circleci/node:13.8.0
     steps:
       - checkout
+      - restore_cache:
+          keys: [backend-build]
       - run:
           name: Scan Back-end dependencies
           command: |
@@ -217,7 +225,7 @@ jobs:
           command: |
             cd backend
             npm install 
-            npm run migrations
+            npm run migrations > migrations_dump.txt
       
 
       # - run:
@@ -259,22 +267,34 @@ jobs:
   #     - run:
   #         name: Get backend url
   #         command: |
-  #           # your code here
+  #           export BACKEND_IP=$(aws ec2 describe-instances \
+  #                  --query 'Reservations[*].Instances[*].PublicIpAddress' \
+  #                  --filters "Name=tag:project,Values=udapeople-${CIRCLE_WORKFLOW_ID:0:7}" \
+  #                  --output text)
   #           export API_URL="http://${BACKEND_IP}:3030"
-  #           echo "${API_URL}"
+  #           echo "API_URL = ${API_URL}"
+  #           echo API_URL="http://${BACKEND_IP}:3030" >> frontend/.env
+  #           cat frontend/.env
+
   #     - run:
   #         name: Deploy frontend objects
   #         command: |
-  #           # your code here
+  #           cd frontend
+  #           npm install
+  #           npm run build
+  #           tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
+  #           aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
+
   #     - destroy-environment:
   #         workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}     
                     
 #   deploy-backend:
 #     docker:
-#       # Docker image here that supports Ansible
+#       - image: circleci/node:13.8.0
 #     steps:
-#       # Checkout code from git
-#       # Add ssh keys with fingerprint
+#       - checkout 
+#       - add_ssh_keys:
+            # fingerprints: []
 #       # attach workspace
 #       - run:
 #           name: Install dependencies
