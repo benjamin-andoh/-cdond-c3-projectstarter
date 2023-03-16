@@ -1,6 +1,6 @@
 - name: "unarchive backend files"
   shell: |
-    --vvv
+    -vvvv
   unarchive:
     src: artifact.tar.gz
     dest: /home/ubuntu/
