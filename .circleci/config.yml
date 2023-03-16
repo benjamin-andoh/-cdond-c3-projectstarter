@@ -240,65 +240,89 @@ jobs:
       - destroy-environment:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
 
-  # deploy-frontend:
+  deploy-frontend:
+    docker:
+      - image: circleci/node:13.8.0
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - run:
+          name: Install tar gzip
+          command: |
+            sudo  apt -y install python3 tar gzip
+      
+      - run:
+          name: Install aws-cli ansible
+          command: |
+            sudo apt-get -y update
+            sudo apt-get -y install awscli ansible
+
+      - run:
+          name: Get backend url
+          command: |
+            export BACKEND_IP=$(aws ec2 describe-instances \
+                   --query 'Reservations[*].Instances[*].PublicIpAddress' \
+                   --filters "Name=tag:project,Values=udapeople-${CIRCLE_WORKFLOW_ID:0:7}" \
+                   --output text)
+            export API_URL="http://${BACKEND_IP}:3030"
+            echo "API_URL = ${API_URL}"
+            echo API_URL="http://${BACKEND_IP}:3030" >> frontend/.env
+            cat frontend/.env
+
+      - run:
+          name: Deploy frontend objects
+          command: |
+            cd frontend
+            npm install
+            npm run build
+            tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
+            aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
+
+      - destroy-environment:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}     
+                    
+  # deploy-backend:
   #   docker:
   #     - image: circleci/node:13.8.0
   #   steps:
-  #     - checkout
+  #     - checkout 
+  #     - add_ssh_keys:
+  #           fingerprints: [56:0e:43:58:88:81:d7:a3:19:12:c9:bb:ec:3e:20:ba]
   #     - attach_workspace:
   #         at: .
   #     - run:
   #         name: Install tar gzip
   #         command: |
-  #           sudo  apt -y install python3 tar gzip
-      
-  #     - run:
+  #           sudo apt -y install python3 tar gzip
+  #     - run: 
   #         name: Install aws-cli ansible
-  #         command: |
+  #         command: 
   #           sudo apt-get -y update
   #           sudo apt-get -y install awscli ansible
-
   #     - run:
-  #         name: Get backend url
+  #         name: Install aws-cli npm node ansible
   #         command: |
-  #           export BACKEND_IP=$(aws ec2 describe-instances \
-  #                  --query 'Reservations[*].Instances[*].PublicIpAddress' \
-  #                  --filters "Name=tag:project,Values=udapeople-${CIRCLE_WORKFLOW_ID:0:7}" \
-  #                  --output text)
-  #           export API_URL="http://${BACKEND_IP}:3030"
-  #           echo "API_URL = ${API_URL}"
-  #           echo API_URL="http://${BACKEND_IP}:3030" >> frontend/.env
-  #           cat frontend/.env
-
+  #           sudo apt -y install awscli ansible
   #     - run:
-  #         name: Deploy frontend objects
+  #         name: Deploy backend
   #         command: |
-  #           cd frontend
+  #           cd backend
   #           npm install
   #           npm run build
-  #           tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
-  #           aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
+  #           cd ..
+  #           tar -C backend -czvf artifact.tar.gz .
+  #           mv artifact.tar.gz ~/project/.circleci/ansible/roles/deploy/files/
+  #           cd .circleci/ansible
+  #           echo "Contents of the inventory.txt file is ---- "
+  #           cat inventory.txt
+  #           ansible-playbook -i inventory.txt deploy-backend.yml -vvvv
 
   #     - destroy-environment:
-  #         workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}     
-                    
-#   deploy-backend:
-#     docker:
-#       - image: circleci/node:13.8.0
-#     steps:
-#       - checkout 
-#       - add_ssh_keys:
-            # fingerprints: []
-#       # attach workspace
-#       - run:
-#           name: Install dependencies
-#           command: |
-#             # your code here
-#       - run:
-#           name: Deploy backend
-#           command: |
-#             # your code here
-#       # Here's where you will add some code to rollback on failure  
+  #         workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
+      
+  #     - revert-migrations:
+  #         workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
 
 #   smoke-test:
 #     docker:
@@ -380,8 +404,8 @@ workflows:
           requires: [deploy-infrastructure]
       - run-migrations:
           requires: [configure-infrastructure]
-      # - deploy-frontend:
-      #     requires: [run-migrations]
+      - deploy-frontend:
+          requires: [run-migrations]
       # - deploy-backend:
       #     requires: [run-migrations]
       # - smoke-test:
