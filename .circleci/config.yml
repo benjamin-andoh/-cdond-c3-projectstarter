@@ -301,7 +301,7 @@ jobs:
             sudo apt -y install python3 tar gzip
       - run: 
           name: Install aws-cli ansible
-          command: 
+          command: |
             sudo apt-get -y update
             sudo apt-get -y install awscli ansible
       - run:
