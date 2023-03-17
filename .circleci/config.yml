@@ -391,7 +391,7 @@ jobs:
 
   cloudfront-update:
     docker:
-      - image: circleci/node:13.8.0
+      - image: amazon/aws-cli
     steps:
       - checkout
       - run:
@@ -432,7 +432,7 @@ jobs:
 
   cleanup:
     docker:
-      - image: circleci/node:13.8.0
+      - image: amazon/aws-cli
     steps:
       - checkout
       
