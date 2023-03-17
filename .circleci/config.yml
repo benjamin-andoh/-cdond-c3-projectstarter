@@ -407,14 +407,14 @@ jobs:
           command: |
             export OldWorkflowID=$(aws cloudformation list-exports --query "Exports[?Name==\`WorkflowID\`].Value" --no-paginate --output text)
                     
-            # echo $OldWorkflowID >> ./OldWorkflowID.txt
-            # cat ./OldWorkflowID.txt
+            echo $OldWorkflowID >> ./OldWorkflowID.txt
+            cat ./OldWorkflowID.txt
 
             # cd .circleci/files/
             # aws cloudformation deploy --template-file cloudfront.yml --stack-name InitialStack --parameter-overrides WorkflowID="${CIRCLE_WORKFLOW_ID:0:7}" --tags project=udapeople
           
             echo OldWorkflowID: "${OldWorkflowID}"
-            # echo Current Workflow ID: "${CIRCLE_WORKFLOW_ID:0:7}"
+            echo Current Workflow ID: "${CIRCLE_WORKFLOW_ID:0:7}"
 
       - persist_to_workspace:
           root: .
@@ -435,7 +435,7 @@ jobs:
           name: Install dependencies
           command: |
             sudo apt-get -y update
-            sudo apt-get -y install curl nodejs npm awscli
+            sudo apt-get -y install curl awscli
       
       - attach_workspace:
           at: .
