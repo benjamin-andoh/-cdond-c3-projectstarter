@@ -12,6 +12,7 @@
 - name: "list directory"
   shell: |
     ls -la
+    
 - name: "executing node"
   shell: |
     npm install
