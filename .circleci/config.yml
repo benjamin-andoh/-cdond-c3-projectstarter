@@ -348,15 +348,6 @@ jobs:
           command: |
             sudo apt-get -y update
             sudo apt-get -y install curl awscli
-
-      - run:
-          name: Frontend smoke test.
-          command: |
-            URL="http://udapeople-${CIRCLE_WORKFLOW_ID:0:7}.s3-website-us-east-1.amazonaws.com/#/employees"
-            echo ${URL} 
-            sudo chmod +x ./frontend.sh
-            ./frontend.sh
-
       - run:
           name: Backend smoke test.
           command: |
@@ -369,7 +360,13 @@ jobs:
             echo "${API_URL}"
             sudo chmod +x ./backend.sh
             ./backend.sh
-
+      - run:
+          name: Frontend smoke test.
+          command: |
+            URL="http://udapeople-${CIRCLE_WORKFLOW_ID:0:7}.s3-website-us-east-1.amazonaws.com/#/employees"
+            echo ${URL} 
+            sudo chmod +x ./frontend.sh
+            ./frontend.sh
       - revert-migrations:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
       - destroy-environment:
