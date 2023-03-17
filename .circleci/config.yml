@@ -177,11 +177,11 @@ jobs:
 
       - destroy-environment:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}   
-          # Here's where you will add some code to rollback on failure    
+ 
 
   configure-infrastructure:
     docker:
-      - image: python:3.7-alpine3.11
+      - image: circleci/python:3.9.13
     steps:
       - checkout 
       - add_ssh_keys:
@@ -191,15 +191,32 @@ jobs:
           at: .
 
       - run:
-          name: Install dependencies
+          name: Install tar gzip
           command: |
-            apk add --update ansible
+            sudo apt-get update
+            sudo apt -y install python3 tar gzip
+
+      - run:
+          name: Install aws cli
+          command: |
+            sudo curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+            sudo unzip awscliv2.zip
+            sudo ./aws/install
+      
+      - run:
+          name: Install ansible
+          command: |
+            sudo apt update
+            sudo apt install software-properties-common
+            sudo add-apt-repository --yes --update ppa:ansible/ansible
+            sudo apt install ansible
 
       - run:
           name: Configure server
           command: |
             cd .circleci/ansible
             ansible-playbook -i inventory.txt configure-server.yml -vvvv
+
       - destroy-environment:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
            
