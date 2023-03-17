@@ -193,8 +193,7 @@ jobs:
       - run:
           name: Install tar gzip
           command: |
-            sudo apt-get update
-            sudo apt -y install  tar gzip
+            yum -y install tar gzip
 
       - run:
           name: Install aws cli
