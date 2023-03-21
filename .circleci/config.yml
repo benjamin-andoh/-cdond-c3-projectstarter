@@ -30,7 +30,7 @@ commands:
           when: on_fail
           command: |
             # Empty frontend bucket
-            aws s3 rm s3://udapeople-<<parameters.Workflow_ID>> --recursive
+            aws s3 rm s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7}" --recursive
             aws cloudformation delete-stack --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}"
             aws cloudformation delete-stack --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}"
 
@@ -179,10 +179,7 @@ jobs:
        - image: cimg/python:3.10
     steps:
       - checkout
-      - install_awscli
-
-
-              
+      - install_awscli      
       - run:
           name: Ensure front-end infrastructure exist
           command: |
