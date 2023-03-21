@@ -21,9 +21,6 @@ commands:
 
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
-    parameters:
-      workflow_id:
-        type: string 
     steps:
       - run:
           name: Destroy backend
@@ -217,23 +214,24 @@ jobs:
 
   configure-infrastructure:
     docker:
-      - image: cimg/python:3.9.13
+      - image: cimg/python:3.10
     steps:
-      - checkout
-      - install_awscli
+      - checkout 
       - install_ansible
+      - install_awscli
       - add_ssh_keys:
-          fingerprints: ["83:63:cf:cb:c0:e8:84:32:75:4a:3e:d6:6b:41:a8:93"]
+          fingerprints: [83:63:cf:cb:c0:e8:84:32:75:4a:3e:d6:6b:41:a8:93]
+      
       - attach_workspace:
           at: ~/
+
       - run:
-          name: Run Configure Server Ansible play
+          name: Configure server
           command: |
             cd .circleci/ansible
-            cat inventory.txt
-            ansible-playbook -i inventory.txt configure-server.yml
+            ansible-playbook -i inventory.txt configure-server.yml -vvvv
+
       - destroy-environment:
-          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
            
 
   # run-migrations:
@@ -501,8 +499,8 @@ workflows:
           filters:
             branches:
               only: [master]
-      - configure-infrastructure:
-          requires: [deploy-infrastructure]
+      # - configure-infrastructure:
+      #     requires: [deploy-infrastructure]
       # - run-migrations:
       #     requires: [configure-infrastructure]
       # - deploy-frontend:
