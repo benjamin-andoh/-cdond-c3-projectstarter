@@ -1,6 +1,21 @@
 version: 2.1
 
 commands:
+
+  install_nodejs:
+    description: Install Node.js 13.8.0
+    steps:
+      - run:
+          name: Install Node.js 13.8.0
+          command: |
+            # Install Node.js LTS version as our base Node.js version
+            curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
+            sudo apt install -y nodejs
+
+            # Use n version manager to use Node.js v13.8.0
+            sudo npm install --global n
+            sudo n 13.8.0
+
   install_awscli:
     description: Install AWS CLI v2
     steps:
@@ -31,24 +46,24 @@ commands:
             aws cloudformation delete-stack --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}"
             aws cloudformation delete-stack --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}"
 
-#   revert-migrations:
-#     description: Revert the last migration if successfully run in the current workflow.
-#     parameters:
-#       workflow_id: 
-#         type: string  
-#     steps:
-#       - run:
-#           name: Revert migrations
-#           when: on_fail
-#           command: |
-#             # SUCCESS=$(curl -H "token: e52b52de-ee26-41a5-86e8-e8dcc3d995a5" --request GET https://api.memstash.io/values/migration_<< parameters.workflow_id >>)
-#             SUCCESS=$(curl --insecure  https://kvdb.io/7BxNdfG935QsDip7KHcMTR/migrtion_<< parameters.workflow_id >>)
-#             if (( $SUCCESS == 1 ));
-#             then
-#                 cd ~/project/backend
-#                 npm install
-#                 npm run migrations:revert
-#             fi 
+  revert-migrations:
+    description: Revert the last migration if successfully run in the current workflow.
+    parameters:
+      workflow_id: 
+        type: string
+        default: ${CIRCLE_WORKFLOW_ID:0:7}  
+    steps:
+      - run:
+          name: Revert migrations
+          when: on_fail
+          command: |
+            SUCCESS=$(curl --insecure  https://kvdb.io/7BxNdfG935QsDip7KHcMTR/migrtion_<< parameters.workflow_id >>)
+            if (( $SUCCESS == 1 ));
+            then
+                cd ~/project/backend
+                npm install
+                npm run migrations:revert
+            fi 
             
 jobs:
   build-frontend:
@@ -231,43 +246,41 @@ jobs:
             cd .circleci/ansible
             ansible-playbook -i inventory.txt configure-server.yml -vvvv
 
-      - destroy-environment:
+      - destroy-environment
            
 
-  # run-migrations:
-  #   docker:
-  #     - image: circleci/node:13.8.0
-  #   steps:
-  #     - checkout
+  run-migrations:
+    docker:
+      - image: cimg/python:3.10
+    steps:
+      - checkout
+      - install_awscli
+      - install_nodejs
 
-  #     - restore_cache:
-  #         keys: [backend-build]
+      - restore_cache:
+          keys: [backend-deps]
 
-  #     - run:
-  #         name: Install aws cli
-  #         command: |
-  #           sudo curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-  #           sudo unzip awscliv2.zip
-  #           sudo ./aws/install
+      - run:
+          name: Run migrations
+          command: |
+            cd backend
+            npm install 
+            npm run migrations > migrations_dump.txt
+            cat migrations_dump.txt
 
-  #     - run:
-  #         name: Run migrations
-  #         command: |
-  #           cd backend
-  #           npm install 
-  #           npm run migrations > migrations_dump.txt
+      - run:
+          name: Send migration results to memstash or kvdb
+          command: |
+            if grep -q "has been executed successfully." backend/migrations_dump.txt
+            then 
+                # If you are using kvdb.io, generate the bucket ID "9GE4jRtKznmVKRfvdBABBe" in your local terminal first
+                curl https://kvdb.io/7BxNdfG935QsDip7KHcMTR/migrtion_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
+            else
+              echo "No migrations are pending" 
+            fi
 
-  #     - run:
-  #         name: Send migration results to memstash or kvdb
-  #         command: | if grep -q "has been executed successfully." backend/migrations_dump.txt
-  #             then 
-  #                 # If you are using memstash.io, generate the token "7933fe63-4687-4fa1-8426-aa25aa1730ec" on the website
-  #                 # curl -H "Content-Type: text/plain" -H "token: 7933fe63-4687-4fa1-8426-aa25aa1730ec" --request PUT --data "1" https://api.memstash.io/values/migration_${CIRCLE_WORKFLOW_ID:0:7}
-  #                 # If you are using kvdb.io, generate the bucket ID "9GE4jRtKznmVKRfvdBABBe" in your local terminal first
-  #                 curl https://kvdb.io/7BxNdfG935QsDip7KHcMTR/migrtion_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
-  #             fi
-  #     - destroy-environment:
-  #         workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
+      - destroy-environment
+      - revert-migrations
 
   # deploy-frontend:
   #   docker:
@@ -499,8 +512,8 @@ workflows:
           filters:
             branches:
               only: [master]
-      # - configure-infrastructure:
-      #     requires: [deploy-infrastructure]
+      - configure-infrastructure:
+          requires: [deploy-infrastructure]
       # - run-migrations:
       #     requires: [configure-infrastructure]
       # - deploy-frontend:
