@@ -11,7 +11,7 @@ commands:
           name: Destroy backend
           when: on_fail
           command: |
-            aws s3 rm s3://udapeople-<<parameters.Workflow_ID>> --recursive
+            aws s3 rm s3://udapeople-<<parameters.workflow_id>> --recursive
             aws cloudformation delete-stack --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}"
             aws cloudformation delete-stack --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}"
 
