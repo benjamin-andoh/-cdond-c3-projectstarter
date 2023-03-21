@@ -223,19 +223,15 @@ jobs:
       - install_awscli
       - install_ansible
       - add_ssh_keys:
-          fingerprints: [	83:63:cf:cb:c0:e8:84:32:75:4a:3e:d6:6b:41:a8:93]
-      
+          fingerprints: ["83:63:cf:cb:c0:e8:84:32:75:4a:3e:d6:6b:41:a8:93"]
       - attach_workspace:
           at: ~/
-
       - run:
           name: Run Configure Server Ansible play
           command: |
             cd .circleci/ansible
             cat inventory.txt
-
             ansible-playbook -i inventory.txt configure-server.yml
-
       - destroy-environment:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
            
