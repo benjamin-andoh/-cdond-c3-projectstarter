@@ -215,46 +215,29 @@ jobs:
       - destroy-environment:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}   
 
-  # configure-infrastructure:
-  #   docker:
-  #     - image: cimg/python:3.9.13
-  #   steps:
-  #     - checkout 
-  #     - add_ssh_keys:
-  #         fingerprints: [56:0e:43:58:88:81:d7:a3:19:12:c9:bb:ec:3e:20:ba]
+  configure-infrastructure:
+    docker:
+      - image: cimg/python:3.9.13
+    steps:
+      - checkout
+      - install_awscli
+      - install_ansible
+      - add_ssh_keys:
+          fingerprints: [56:0e:43:58:88:81:d7:a3:19:12:c9:bb:ec:3e:20:ba]
       
-  #     - attach_workspace:
-  #         at: .
+      - attach_workspace:
+          at: ~/
 
-  #     - run:
-  #         name: Install tar gzip
-  #         command: |
-  #           sudo apt-get update
-  #           sudo apt -y install python3 tar gzip
+      - run:
+          name: Run Configure Server Ansible play
+          command: |
+            cd .circleci/ansible
+            cat inventory.txt
 
-  #     - run:
-  #         name: Install aws cli
-  #         command: |
-  #           sudo curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-  #           sudo unzip awscliv2.zip
-  #           sudo ./aws/install
-      
-  #     - run:
-  #         name: Install ansible
-  #         command: |
-  #           sudo apt update
-  #           sudo apt install software-properties-common
-  #           sudo add-apt-repository --yes --update ppa:ansible/ansible
-  #           sudo apt install ansible
+            ansible-playbook -i inventory.txt configure-server.yml
 
-  #     - run:
-  #         name: Configure server
-  #         command: |
-  #           cd .circleci/ansible
-  #           ansible-playbook -i inventory.txt configure-server.yml -vvvv
-
-  #     - destroy-environment:
-  #         workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
+      - destroy-environment:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
            
 
   # run-migrations:
@@ -522,8 +505,8 @@ workflows:
           filters:
             branches:
               only: [master]
-      # - configure-infrastructure:
-      #     requires: [deploy-infrastructure]
+      - configure-infrastructure:
+          requires: [deploy-infrastructure]
       # - run-migrations:
       #     requires: [configure-infrastructure]
       # - deploy-frontend:
