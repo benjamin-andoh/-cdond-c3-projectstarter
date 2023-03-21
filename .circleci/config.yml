@@ -414,7 +414,7 @@ jobs:
             cd .circleci/files/
             aws cloudformation deploy \
                     --template-file cloudfront.yml \
-                    --stack-name InitialStack \
+                    --stack-name InitialSatck \
                     --parameter-overrides WorkflowID="${CIRCLE_WORKFLOW_ID:0:7}" \
                     --tags project=udapeople
           
@@ -484,9 +484,9 @@ workflows:
           requires: [build-frontend]
       - deploy-infrastructure:
           requires: [test-frontend, test-backend, scan-frontend, scan-backend]
-          # filters:
-          #   branches:
-          #     only: [test-feature-branch]
+          filters:
+            branches:
+              only: [master]
       - configure-infrastructure:
           requires: [deploy-infrastructure]
       - run-migrations:
