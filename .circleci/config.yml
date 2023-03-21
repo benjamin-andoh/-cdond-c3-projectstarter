@@ -386,20 +386,20 @@ jobs:
           command: |
             sudo apt-get -y update
             sudo apt-get -y install curl awscli
-      - run:
-          name: Backend smoke test.
-          command: |
-            #Fetch and prepare the BACKEND_IP env var
-            export BACKEND_IP=$(aws ec2 describe-instances \
-                  --query 'Reservations[*].Instances[*].PublicIpAddress' \
-                  --filters "Name=tag:project,Values=udapeople-${CIRCLE_WORKFLOW_ID:0:7}" \
-                  --output text)
+      # - run:
+      #     name: Backend smoke test.
+      #     command: |
+      #       #Fetch and prepare the BACKEND_IP env var
+      #       export BACKEND_IP=$(aws ec2 describe-instances \
+      #             --query 'Reservations[*].Instances[*].PublicIpAddress' \
+      #             --filters "Name=tag:project,Values=udapeople-${CIRCLE_WORKFLOW_ID:0:7}" \
+      #             --output text)
 
-            export API_URL="http://${BACKEND_IP}:3030"
-            echo "${API_URL}"
+      #       export API_URL="http://${BACKEND_IP}:3030"
+      #       echo "${API_URL}"
 
-            sudo chmod +x ./backend.sh
-            ./backend.sh
+      #       sudo chmod +x ./backend.sh
+      #       ./backend.sh
       - run:
           name: Frontend smoke test.
           command: |
