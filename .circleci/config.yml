@@ -11,12 +11,8 @@ commands:
           name: Destroy backend
           when: on_fail
           command: |
+            aws s3 rm s3://udapeople-<<parameters.Workflow_ID>> --recursive
             aws cloudformation delete-stack --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}"
-
-      - run: 
-          name: Destroy frontend
-          when: on_fail
-          command: |
             aws cloudformation delete-stack --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}"
 
   revert-migrations:
@@ -29,7 +25,6 @@ commands:
           name: Revert migrations
           when: on_fail
           command: |
-            # SUCCESS=$(curl -H "token: e52b52de-ee26-41a5-86e8-e8dcc3d995a5" --request GET https://api.memstash.io/values/migration_<< parameters.workflow_id >>)
             SUCCESS=$(curl --insecure  https://kvdb.io/7BxNdfG935QsDip7KHcMTR/migrtion_<< parameters.workflow_id >>)
             if (( $SUCCESS == 1 ));
             then
@@ -177,7 +172,6 @@ jobs:
 
       - destroy-environment:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}   
-          # Here's where you will add some code to rollback on failure    
 
   configure-infrastructure:
     docker:
@@ -185,7 +179,7 @@ jobs:
     steps:
       - checkout 
       - add_ssh_keys:
-          fingerprints: [56:0e:43:58:88:81:d7:a3:19:12:c9:bb:ec:3e:20:ba]
+          fingerprints: [83:63:cf:cb:c0:e8:84:32:75:4a:3e:d6:6b:41:a8:93]
       
       - attach_workspace:
           at: .
@@ -308,7 +302,7 @@ jobs:
     steps:
       - checkout 
       - add_ssh_keys:
-            fingerprints: [56:0e:43:58:88:81:d7:a3:19:12:c9:bb:ec:3e:20:ba]
+            fingerprints: [83:63:cf:cb:c0:e8:84:32:75:4a:3e:d6:6b:41:a8:93]
       - attach_workspace:
           at: .
       - run:
