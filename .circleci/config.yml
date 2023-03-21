@@ -83,33 +83,43 @@ jobs:
           paths: [backend/node_modules]
           key: backend-deps-{{ checksum "backend/package-lock.json" }}
 
-  # test-frontend:
-  #   docker: 
-  #     - image: circleci/node:13.8.0
-  #   steps:
-  #     - checkout
-  #     - restore_cache:
-  #         keys: [frontend-build]
-  #     - run:
-  #         name: Run front-end test
-  #         command: |
-  #           cd frontend && \
-  #           npm install && \
-  #           npm run test
+  test-frontend:
+    docker: 
+    - image: circleci/node:13.8.0
+    steps:
+    - checkout
+    - restore_cache:
+       keys:
+         - frontend-deps-{{ checksum "frontend/package-lock.json" }}
+    - run:
+        name: Install dependencies
+        command: |
+          cd frontend
+          npm install
+    - run:
+        name: Run frontend unit tests
+        command: |
+          cd frontend
+          npm run test
                 
-  # test-backend:
-  #   docker:
-  #     - image: circleci/node:13.8.0
-  #   steps:
-  #     - checkout
-  #     - restore_cache:
-  #         keys: [backend-build]      
-  #     - run:
-  #         name: Run Back-end test
-  #         command: |
-  #           cd backend && \
-  #           npm install && \
-  #           npm run test
+  test-backend:
+    docker:
+    - image: cimg/node:13.8.0
+    steps:
+    - checkout
+    - restore_cache:
+       keys:
+         - backend-deps-{{ checksum "backend/package-lock.json" }}
+    - run:
+        name: Install dependencies
+        command: |
+          cd backend
+          npm install
+    - run:
+        name: Run backend unit tests
+        command: |
+          cd backend
+          npm run test
             
   # scan-frontend:
   #   docker:
