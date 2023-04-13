@@ -196,45 +196,26 @@ jobs:
 
   configure-infrastructure:
     docker:
-      - image: cimg/python:3.9.13
+      - image: cimg/python:3.10
     steps:
-      - checkout 
+      - checkout
+      - install_ansible
+      - install_awscli
       - add_ssh_keys:
           fingerprints: [fb:9f:ec:f6:c7:17:a4:90:3a:57:24:c6:a3:8f:90:49]
       
       - attach_workspace:
-          at: .
+          at: ~/
 
       - run:
-          name: Install tar gzip
-          command: |
-            sudo apt-get update
-            sudo apt -y install python3 tar gzip
-
-      - run:
-          name: Install aws cli
-          command: |
-            sudo curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-            sudo unzip awscliv2.zip
-            sudo ./aws/install
-      
-      - run:
-          name: Install ansible
-          command: |
-            sudo apt update
-            sudo apt install software-properties-common
-            sudo add-apt-repository --yes --update ppa:ansible/ansible
-            sudo apt install ansible
-
-      - run:
-          name: Configure server
+          name: Run Configure Server Ansible play
           command: |
             cd .circleci/ansible
-            ansible-playbook -i inventory.txt configure-server.yml -vvvv
+            cat inventory.txt
 
-      - destroy-environment:
-          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
-           
+            ansible-playbook -i inventory.txt configure-server.yml
+      - destroy-environment
+            
 
   run-migrations:
     docker:
