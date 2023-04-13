@@ -19,6 +19,20 @@ commands:
           command: |
             python3 -m pip install --user ansible
 
+  install_nodejs:
+    description: Install Node.js 13.8.0
+    steps:
+      - run:
+          name: Install Node.js 13.8.0
+          command: |
+            # Install Node.js LTS version as our base Node.js version
+            curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
+            sudo apt install -y nodejs
+
+            # Use n version manager to use Node.js v13.8.0
+            sudo npm install --global n
+            sudo n 13.8.0
+
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
     parameters:
@@ -246,8 +260,9 @@ jobs:
                   # If you are using kvdb.io, generate the bucket ID "9GE4jRtKznmVKRfvdBABBe" in your local terminal first
                   curl https://kvdb.io/7BxNdfG935QsDip7KHcMTR/migrtion_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
               fi
-      - install_awscli
-      - install_nodejs
+              
+      - destroy-environment
+      - revert-migrations
 
   deploy-frontend:
     docker:
