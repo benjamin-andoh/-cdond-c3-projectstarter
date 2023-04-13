@@ -42,8 +42,9 @@ commands:
   revert-migrations:
     description: Revert the last migration if successfully run in the current workflow.
     parameters:
-      workflow_id: 
-        type: string  
+      Workflow_ID:
+        type: string
+        default: ${CIRCLE_WORKFLOW_ID:0:7} 
     steps:
       - run:
           name: Revert migrations
@@ -219,19 +220,13 @@ jobs:
 
   run-migrations:
     docker:
-      - image: circleci/node:13.8.0
+      - image: cimg/python:3.10
     steps:
       - checkout
-
+      - install_awscli
+      - install_nodejs
       - restore_cache:
           keys: [backend-build]
-
-      - run:
-          name: Install aws cli
-          command: |
-            sudo curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-            sudo unzip awscliv2.zip
-            sudo ./aws/install
 
       - run:
           name: Run migrations
@@ -251,8 +246,8 @@ jobs:
                   # If you are using kvdb.io, generate the bucket ID "9GE4jRtKznmVKRfvdBABBe" in your local terminal first
                   curl https://kvdb.io/7BxNdfG935QsDip7KHcMTR/migrtion_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
               fi
-      - destroy-environment:
-          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
+      - install_awscli
+      - install_nodejs
 
   deploy-frontend:
     docker:
@@ -460,8 +455,6 @@ jobs:
               echo "--------------------------Cannot Clean--------------------------"
             fi
             
-            
-
 workflows:
   default:
     jobs:
@@ -482,8 +475,8 @@ workflows:
               only: [master]
       - configure-infrastructure:
           requires: [deploy-infrastructure]
-      # - run-migrations:
-      #     requires: [configure-infrastructure]
+      - run-migrations:
+          requires: [configure-infrastructure]
       # - deploy-frontend:
       #     requires: [run-migrations]
       # - deploy-backend:
