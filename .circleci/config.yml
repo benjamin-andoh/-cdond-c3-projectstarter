@@ -368,7 +368,7 @@ jobs:
             export API_URL=http://${BACKEND_PUBLIC_IP}:3030
 
             echo $API_URL/ap/status
-            
+
             if curl -s $API_URL/api/status | grep "ok"
             then
                 exit 0
@@ -388,7 +388,7 @@ jobs:
             fi
 
       - revert-migrations
-      - destroy-environment
+      # - destroy-environment
 
   cloudfront-update:
     docker:
